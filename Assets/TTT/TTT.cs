@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum PlayerOption
@@ -25,9 +23,9 @@ public class TTT : MonoBehaviour
 
         board.InitializeBoard(Columns, Rows);
 
-        for(int i = 0; i < Rows; i++)
+        for (int i = 0; i < Rows; i++)
         {
-            for(int j = 0; j < Columns; j++)
+            for (int j = 0; j < Columns; j++)
             {
                 cells[j, i] = new Cell();
                 cells[j, i].current = PlayerOption.NONE;
@@ -37,6 +35,13 @@ public class TTT : MonoBehaviour
 
     public void MakeOptimalMove()
     {
+        // if player 1 takes corner, take center
+        if (PlayerOption.X == cells[0, 0].current || PlayerOption.X == cells[0, 2].current || PlayerOption.X == cells[2, 0].current || PlayerOption.X == cells[2, 2].current)
+        {
+            ChooseSpace(1, 1);
+        }
+
+
 
     }
 
@@ -57,7 +62,7 @@ public class TTT : MonoBehaviour
         board.UpdateCellVisual(column, row, currentPlayer);
 
         // if there's no winner, keep playing, otherwise end the game
-        if(GetWinner() == PlayerOption.NONE)
+        if (GetWinner() == PlayerOption.NONE)
             EndTurn();
         else
         {
@@ -126,7 +131,7 @@ public class TTT : MonoBehaviour
         // check diagonals
         // top left to bottom right
         sum = 0;
-        for(int i = 0; i < Rows; i++)
+        for (int i = 0; i < Rows; i++)
         {
             int value = 0;
             if (cells[i, i].current == PlayerOption.X)
