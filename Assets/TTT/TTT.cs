@@ -15,6 +15,7 @@ public class TTT : MonoBehaviour
 
     PlayerOption currentPlayer = PlayerOption.X;
     Cell[,] cells;
+    int[,] corners = { { 0, 0 }, { 0, 2 }, { 2, 0 }, { 2, 2 } };
 
     // Start is called before the first frame update
     void Start()
@@ -33,14 +34,20 @@ public class TTT : MonoBehaviour
         }
     }
 
+
     public void MakeOptimalMove()
     {
         // if player 1 takes corner, take center
-        if (PlayerOption.X == cells[0, 0].current || PlayerOption.X == cells[0, 2].current || PlayerOption.X == cells[2, 0].current || PlayerOption.X == cells[2, 2].current)
+        for (int i = 0; i < corners.GetLength(0); i++)
         {
-            ChooseSpace(1, 1);
-        }
+            int row = corners[i, 0];
+            int column = corners[i, 1];
 
+            if (PlayerOption.X == cells[row, column].current)
+            {
+                ChooseSpace(1, 1);
+            }
+        }
 
 
     }
