@@ -58,6 +58,39 @@ public class TTT : MonoBehaviour
         int openCorner = Array.FindIndex(corners, cell => cell.current == PlayerOption.NONE);
 
 
+
+        // if current hold corner and center occupied, take adjacent
+        if (currentCorner > -1 && center.current != PlayerOption.NONE)
+        {
+            int x = cornersIndex[currentCorner].Item1;
+            int y = cornersIndex[currentCorner].Item2;
+
+            // choose new x positions
+            if (x + 1 < 3 && cells[x + 1, y].current == PlayerOption.NONE)
+            {
+                ChooseSpace(x + 1, y);
+                return;
+            }
+            else if (x - 1 >= 0 && cells[x - 1, y].current == PlayerOption.NONE)
+            {
+                ChooseSpace(x - 1, y);
+                return;
+            }
+
+            // choose new y positions
+            else if (y + 1 < 3 && cells[x, y + 1].current == PlayerOption.NONE)
+            {
+                ChooseSpace(x, y + 1);
+                return;
+            }
+            else if (y - 1 >= 0 && cells[x, y - 1].current == PlayerOption.NONE)
+            {
+                ChooseSpace(x, y - 1);
+                return;
+            }
+
+        }
+
         // check if opponent has corner, take center if available
         if (oppCorner > -1 && center.current == PlayerOption.NONE)
         {
@@ -74,12 +107,12 @@ public class TTT : MonoBehaviour
             return;
         }
 
-        // if current hold corner and center occupied, take adjacent
-        else if (currentCorner > -1 && center.current != PlayerOption.NONE)
+        // if board is empty, take corner as default move
+        else
         {
-            int x = cornersIndex[currentCorner].Item1;
-            int y = cornersIndex[currentCorner].Item2;
+            ChooseSpace(0, 0);
         }
+
 
     }
 
