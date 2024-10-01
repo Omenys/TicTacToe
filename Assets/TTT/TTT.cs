@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public enum PlayerOption
@@ -15,7 +16,7 @@ public class TTT : MonoBehaviour
 
     PlayerOption currentPlayer = PlayerOption.X;
     Cell[,] cells;
-    int[,] corners = { { 0, 0 }, { 0, 2 }, { 2, 0 }, { 2, 2 } };
+    //int[,] corners = { { 0, 0 }, { 0, 2 }, { 2, 0 }, { 2, 2 } };
 
     // Start is called before the first frame update
     void Start()
@@ -35,20 +36,50 @@ public class TTT : MonoBehaviour
     }
 
 
+
     public void MakeOptimalMove()
     {
-        // if player 1 takes corner, take center
-        for (int i = 0; i < corners.GetLength(0); i++)
-        {
-            int row = corners[i, 0];
-            int column = corners[i, 1];
+        // check for available win
+        // check for available block
 
-            if (PlayerOption.X == cells[row, column].current)
-            {
-                ChooseSpace(1, 1);
-            }
+        // check for current player
+        PlayerOption opponent = PlayerOption.X == currentPlayer ? PlayerOption.O : PlayerOption.X;
+
+        // center cell
+        Cell center = cells[1, 1];
+
+        // corner cells
+        Cell[] corners = { cells[0, 0], cells[0, 2], cells[2, 0], cells[2, 2] };
+        (int, int)[] cornersIndex = { (0, 0), (0, 2), (2, 0), (2, 2) };
+
+        // check corners
+        int currentCorner = Array.FindIndex(corners, cell => cell.current == currentPlayer);
+        int oppCorner = Array.FindIndex(corners, cell => cell.current == opponent);
+        int openCorner = Array.FindIndex(corners, cell => cell.current == PlayerOption.NONE);
+
+
+        // check if opponent has corner, take center if available
+        if (oppCorner > -1 && center.current == PlayerOption.NONE)
+        {
+            ChooseSpace(1, 1);
+            return;
         }
 
+        // take corner if center taken and corner available
+        else if (center.current != PlayerOption.NONE && openCorner > -1)
+        {
+            int x = cornersIndex[openCorner].Item1;
+            int y = cornersIndex[openCorner].Item2;
+            ChooseSpace(x, y);
+            return;
+        }
+
+        // if current hold corner and center occupied, take adjacent
+        else if (currentCorner > -1 && center.current != PlayerOption.NONE)
+        {
+            int x = cornersIndex[currentCorner].Item1;
+            int y = cornersIndex[currentCorner].Item2;
+        }
 
     }
 
