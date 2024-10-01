@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum PlayerOption
 {
@@ -39,9 +40,6 @@ public class TTT : MonoBehaviour
 
     public void MakeOptimalMove()
     {
-        // check for available win
-        // check for available block
-
         // check for current player
         PlayerOption opponent = PlayerOption.X == currentPlayer ? PlayerOption.O : PlayerOption.X;
 
@@ -57,7 +55,16 @@ public class TTT : MonoBehaviour
         int oppCorner = Array.FindIndex(corners, cell => cell.current == opponent);
         int openCorner = Array.FindIndex(corners, cell => cell.current == PlayerOption.NONE);
 
-
+        // make winning move if available
+        if (WinAvailable(currentPlayer))
+        {
+            return;
+        }
+        // block opponent from win if available
+        if (WinAvailable(opponent))
+        {
+            return;
+        }
 
         // if current hold corner and center occupied, take adjacent
         if (currentCorner > -1 && center.current != PlayerOption.NONE)
@@ -107,13 +114,170 @@ public class TTT : MonoBehaviour
             return;
         }
 
-        // if board is empty, take corner as default move
-        else
+        // if nothing else, choose empty space available
+        ChooseEmpty();
+
+
+    }
+
+    // check if winning move available
+    public bool WinAvailable(PlayerOption currentPlayer)
+    {
+        // determine current player to sum values
+        int currentPlayerMarks = currentPlayer == PlayerOption.X ? 1 : -1;
+
+        // check rows
+        for (int i = 0; i < Rows; i++)
         {
-            ChooseSpace(0, 0);
+            int sum = 0;
+            int openCell = -1;
+            for (int j = 0; j < Columns; j++)
+            {
+
+                if (cells[j, i].current == PlayerOption.X)
+                {
+                    sum += 1;
+
+                }
+                else if (cells[j, i].current == PlayerOption.O)
+                {
+                    sum += -1;
+
+                }
+                // store open cell
+                if (cells[j, i].current == PlayerOption.NONE)
+                {
+                    openCell = j;
+
+                }
+
+            }
+
+            if (sum == 2 * currentPlayerMarks && openCell != -1)
+            {
+                ChooseSpace(openCell, i);
+                return true;
+            }
+
         }
 
+        // check columns
+        for (int j = 0; j < Columns; j++)
+        {
+            int sum = 0;
+            int openCell = -1;
+            for (int i = 0; i < Rows; i++)
+            {
+                if (cells[j, i].current == PlayerOption.X)
+                {
+                    sum += 1;
 
+                }
+                else if (cells[j, i].current == PlayerOption.O)
+                {
+                    sum += -1;
+
+                }
+                // store open cell
+                if (cells[j, i].current == PlayerOption.NONE)
+                {
+                    openCell = i;
+
+                }
+            }
+
+            if (sum == 2 * currentPlayerMarks && openCell != -1)
+            {
+                ChooseSpace(j, openCell);
+                return true;
+            }
+
+        }
+
+        // check diagonals
+        // top left to bottom right
+        int d1Sum = 0;
+        int d1Open = -1;
+        for (int i = 0; i < Rows; i++)
+        {
+
+            if (cells[i, i].current == PlayerOption.X)
+                d1Sum += 1;
+            else if (cells[i, i].current == PlayerOption.O)
+                d1Sum += -1;
+
+            // store open cell
+            if (cells[i, i].current == PlayerOption.NONE)
+            {
+                d1Open = i;
+
+            }
+
+        }
+        if (d1Sum == 2 * currentPlayerMarks && d1Open != -1)
+        {
+            ChooseSpace(d1Open, d1Open);
+            return true;
+        }
+
+        // top right to bottom left
+        int d2Sum = 0;
+        int d2Open = -1;
+        for (int i = 0; i < Rows; i++)
+        {
+
+            if (cells[Columns - 1 - i, i].current == PlayerOption.X)
+                d2Sum += 1;
+            else if (cells[Columns - 1 - i, i].current == PlayerOption.O)
+                d2Sum += -1;
+
+            // store open cell
+            if (cells[Columns - 1 - i, i].current == PlayerOption.NONE)
+            {
+                d2Open = i;
+            }
+
+        }
+
+        if (d2Sum == 2 * currentPlayerMarks && d2Open != -1)
+        {
+            ChooseSpace(Columns - 1 - d2Open, d2Open);
+            return true;
+        }
+
+        return false;
+    }
+
+    // take empty cell if available
+    public void ChooseEmpty()
+    {
+        for (int i = 0; i < Rows; i++)
+        {
+            for (int j = 0; j < Columns; j++)
+            {
+                if (cells[j, i].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(j, i);
+                    return;
+                }
+            }
+        }
+    }
+
+    // check if board is full
+    public bool BoardIsFull()
+    {
+        for (int i = 0; i < Rows; i++)
+        {
+            for (int j = 0; j < Columns; j++)
+            {
+                if (cells[j, i].current == PlayerOption.NONE)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void ChooseSpace(int column, int row)
@@ -135,8 +299,11 @@ public class TTT : MonoBehaviour
         // if there's no winner, keep playing, otherwise end the game
         if (GetWinner() == PlayerOption.NONE)
             EndTurn();
-        else
+
+        // reset game on game over
+        if (GetWinner() != PlayerOption.NONE || BoardIsFull())
         {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             Debug.Log("GAME OVER!");
         }
     }
